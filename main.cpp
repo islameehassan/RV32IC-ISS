@@ -4,5 +4,5 @@ using std::cout;
 using std::cin;
 
 int main(){
-    cout << "Hello, RISC-V"
+    cout << "Hello, RISC-V";
 }
