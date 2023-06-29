@@ -16,17 +16,17 @@ static const string regnames[] = {
 
 class RegisterFile{
     // Register File
-    uint32_t regfile[32];
+    int32_t regfile[32];
 
 public:
     // initializes x0 with 0, and the rest with 0x1 (dummy value)
     RegisterFile();
 
     // set register "r" with value "value"
-    int set(int r, uint32_t value);
+    int set(int r, int32_t value);
 
     // get the value stored in register "r"
-    uint32_t get(int r);
+    int32_t get(int r);
 
     // get the mnemonic name for register "r"
     string getMnemonic(int r);
