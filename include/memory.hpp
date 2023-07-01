@@ -3,6 +3,11 @@
 
 #include <iostream>
 #include <cstdint>
+#include <fstream>
+#include <cstdlib>
+#include <iomanip>
+#include "cstring"
+#include <stdexcept>
 
 // Memory is byte addressable
 class Memory{
@@ -10,6 +15,8 @@ class Memory{
     // text section array assumed to start at 0x00000000 and has size = 64Kbytes
     // data section array assumed to start at 0x00010000 and has size = 16Kbytes
     uint8_t memory_array [81920];
+    uint32_t eof_text_section;
+
 
 public:
     // initializes memory with 0x0
@@ -23,11 +30,14 @@ public:
     // read word in memory starting from location
     uint32_t read_word (int location);
 
+    // get end of text section
+    uint32_t get_eot() const;
+
     // store byte in memory starting in location
-    int store_byte (int location,uint8_t byte);
+    int store_byte (int location,uint32_t word);
 
     // store half word in memory starting from location
-    int store_half_word (int location,uint16_t half_word);
+    int store_half_word (int location,uint32_t word);
 
     // store word in memory starting from location
     int store_word (int location,uint32_t word);

@@ -2,30 +2,48 @@
 
 disassembler::disassembler(const std::string& machine_code_fname) {
     mem.load_text_section(machine_code_fname);
+    run();
+    // decode_instruction(65815);
+    /* testing
+    mem.store_byte(0,0b01101000);
+    mem.store_byte(1,0b01100101);
+    mem.store_byte(2,0b01101100);
+    mem.store_byte(3,0b01101100);
+    mem.store_byte(4,0b00000000);
+    print_string(0x00000004);
+    register_file.set(31,10);
+    register_file.set(1,0);
+    PC = 4 ;
+    uint32_t instruction = 0xfe2f80e7;
+    execute_itype_jalr(instruction);
+    int32_t test = register_file.get(1);
+    int32_t test2 = register_file.get(31);
+    std::cout<<test<<"\n"<<test2<<"\n"<<PC;
+     */
 }
 
 void disassembler::run() {
     // Set PC to the beginning of the text section
     // Load half a word per iteration to support compressed instructions
-    for(PC = 0x00000000 ; PC < 0x00010000 ; PC+=2){
+    for(PC = 0x00000000 ; PC <= mem.get_eot() ; ){
         uint16_t  half_word = mem.read_half_word(PC);
         if((half_word & 0x03) != 0x03){
-            // it is a compressed instruction
+                is_cur_inst_compressed = true ;
+                // it is a compressed instruction
+                std::cout<<"ERROR"<<PC<<"\n";
+                PC+=2;
         }else if((half_word & 0x03) == 0x03 && (half_word & 0x1C) != 0x1C) {
-
+                is_cur_inst_compressed = false ;
+                uint32_t word = mem.read_word(PC);
+                decode_instruction(word);
+                PC+=4;
         }else
-            continue;
-
-
+                continue;
     }
 }
 
-uint32_t disassembler::decode_compressed_intstruction(uint16_t cinstruction) {
+uint32_t disassembler::decode_compressed_instruction(uint16_t cinstruction) {
     return 0;
-}
-
-void disassembler::execute(uint32_t instruction) {
-
 }
 
 uint32_t disassembler::get_opcode(uint32_t instruction) {
@@ -94,5 +112,283 @@ int32_t disassembler::get_imm_jtype(uint32_t instruction) {
     imm_j |= (int32_t)(instruction & 0x000FF000);              // extract bits 19 : 12
     return imm_j;
 }
+
+uint32_t disassembler::decode_instruction(uint32_t instruction) {
+
+    uint32_t opcode = get_opcode(instruction);
+    switch (opcode) {
+        case R_opcode:
+            execute_rtype(instruction);
+            break;
+        case S_opcode:
+            execute_stype(instruction);
+            break;
+        case B_opcode:
+            execute_btype(instruction);
+            break;
+        case I_arth_opcode:
+            execute_itype_arit(instruction);
+            break;
+        case I_load_opcode:
+            execute_itype_load(instruction);
+            break;
+        case I_jalr_opcode:
+            execute_itype_jalr(instruction);
+            break;
+        case I_syscall_opcode:
+            execute_ecall(instruction);
+            break;
+        case U_auipc_opcode:
+            execute_utype_aui(instruction);
+            break;
+        case U_lui_opcode:
+            execute_utype_lui(instruction);
+            break;
+        case Jal_opcode:
+            execute_jtype(instruction);
+            break;
+        default:
+            break;
+    }
+}
+
+void disassembler::execute_rtype(uint32_t instruction) {
+    uint32_t func3 = get_func3(instruction);
+    uint32_t rs1   = get_rs1(instruction);
+    uint32_t rs2   = get_rs2(instruction);
+    int32_t destination_value = 0x0;
+
+    switch (func3) {
+        case 0x0:
+            if(get_func7(instruction))
+                destination_value = register_file.get(rs1) - register_file.get(rs2);
+            else
+                destination_value = register_file.get(rs1) + register_file.get(rs2);
+            break;
+        case 0x1:
+            destination_value = register_file.get(rs1) << register_file.get(rs2);
+            if(register_file.get(rs2)<0)
+                destination_value = 0 ;
+            break;
+        case 0x2:
+            if(register_file.get(rs1)<register_file.get(rs2))
+                destination_value = 0x1;
+            else
+                destination_value = 0x0;
+            break;
+        case 0x3:
+            if((uint32_t)register_file.get(rs1)<(uint32_t)register_file.get(rs2))
+                destination_value = 0x1;
+            else
+                destination_value = 0x0;
+            break;
+        case 0x4:
+                destination_value = register_file.get(rs1) ^ register_file.get(rs2);
+            break;
+        case 0x5:
+            if(get_func7(instruction))
+                destination_value = register_file.get(rs1) >> register_file.get(rs2);
+            else
+                destination_value = (int32_t)((uint32_t)register_file.get(rs1) >> register_file.get(rs2));
+            if(register_file.get(rs2)<0)
+                destination_value = 0 ;
+            break;
+        case 0x6:
+            destination_value = register_file.get(rs1) | register_file.get(rs2);
+            break;
+        case 0x7:
+            destination_value = register_file.get(rs1) & register_file.get(rs2);
+            break;
+        default:
+            break;
+    }
+    std::cout<<register_file.getMnemonic(rs1)<<std::setw(8)<<register_file.getMnemonic(rs2)
+    <<std::setw(8)<<register_file.getMnemonic(get_rd(instruction))<<"\n";
+    register_file.set(get_rd(instruction),destination_value);
+}
+
+void disassembler::execute_itype_jalr(uint32_t instruction) {
+
+    int32_t destination = get_imm_itype(instruction)+register_file.get(get_rs1(instruction));
+    register_file.set(get_rd(instruction),is_cur_inst_compressed ? PC+2 : PC+4);  // MIGHT BE WRONG
+    PC = (is_cur_inst_compressed ? destination - 2 : destination - 4) ;
+}
+
+
+void disassembler::execute_itype_arit(uint32_t instruction) {
+    uint32_t func3 = get_func3(instruction);
+    uint32_t rs1   = get_rs1(instruction);
+    int32_t imm   = get_imm_itype(instruction);
+    int32_t destination_value = 0x0;
+
+    switch (func3) {
+        case 0x0:
+            destination_value = register_file.get(rs1) + imm;
+            break;
+        case 0x1:
+            imm = imm & 0x1F;
+            destination_value = register_file.get(rs1) << imm ;
+            break;
+        case 0x2:
+            if(register_file.get(rs1)<imm)
+                destination_value = 0x1;
+            else
+                destination_value = 0x0;
+            break;
+        case 0x3:
+            if((uint32_t)register_file.get(rs1)<(uint32_t)imm)
+                destination_value = 0x1;
+            else
+                destination_value = 0x0;
+            break;
+        case 0x4:
+            destination_value = register_file.get(rs1) ^ imm;
+            break;
+        case 0x5:
+            if(!(imm & 0xF00)) {
+                imm = imm & 0x1F;
+                destination_value = (int32_t)((uint32_t)register_file.get(rs1) >> imm);
+            }else{
+                imm = imm & 0x1F;
+                destination_value = register_file.get(rs1) >> imm;
+            }
+            break;
+        case 0x6:
+            destination_value = register_file.get(rs1) | imm;
+            break;
+        case 0x7:
+            destination_value = register_file.get(rs1) & imm;
+            break;
+        default:
+            break;
+    }
+    register_file.set(get_rd(instruction),destination_value);
+}
+
+void disassembler::execute_stype(uint32_t instruction) {
+    uint32_t func3 = get_func3(instruction);
+    uint32_t rs2   = get_rs2(instruction);
+    int32_t destination_value = get_imm_stype(instruction) + register_file.get(get_rs1(instruction));
+
+    switch (func3) {
+        case 0x0:
+            mem.store_byte(destination_value,register_file.get(rs2));
+            break;
+        case 0x1:
+            mem.store_half_word(destination_value,register_file.get(rs2));
+            break;
+        case 0x2:
+            mem.store_word(destination_value,register_file.get(rs2));
+            break;
+        default:
+            break;
+    }
+}
+
+void disassembler::execute_btype(uint32_t instruction) {
+    uint32_t func3 = get_func3(instruction);
+    uint32_t rs1   = get_rs1(instruction);
+    uint32_t rs2   = get_rs2(instruction);
+
+    switch (func3) {
+        case 0x0:
+            if(register_file.get(rs1)==register_file.get(rs2))
+                PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            break;
+        case 0x1:
+            if(register_file.get(rs1)!=register_file.get(rs2))
+                PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            break;
+        case 0x4:
+            if(register_file.get(rs1)<register_file.get(rs2))
+                PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            break;
+        case 0x5:
+            if(register_file.get(rs1)>=register_file.get(rs2))
+                PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            break;
+        case 0x6:
+            if((uint32_t)register_file.get(rs1)<(uint32_t)register_file.get(rs2))
+                PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            break;
+        case 0x7:
+            if((uint32_t)register_file.get(rs1)>=(uint32_t)register_file.get(rs2))
+                PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            break;
+        default:
+            break;
+    }
+}
+
+void disassembler::execute_jtype(uint32_t instruction) {
+    register_file.set(get_rd(instruction),is_cur_inst_compressed ? PC+2 : PC+4);
+    PC = (is_cur_inst_compressed ? (PC+get_imm_jtype(instruction)-2):(PC+get_imm_jtype(instruction)-4)); // MIGHT BE WRONG
+}
+
+void disassembler::execute_utype_lui(uint32_t instruction) {
+    register_file.set(get_rd(instruction), get_imm_utype(instruction));
+}
+
+void disassembler::execute_utype_aui(uint32_t instruction) {
+    register_file.set(get_rd(instruction),PC + get_imm_jtype(instruction));
+}
+
+void disassembler::execute_itype_load(uint32_t instruction) {
+    uint32_t func3 = get_func3(instruction);
+    uint32_t rs1   = get_rs1(instruction);
+    int32_t  imm   = get_imm_itype(instruction);
+    int32_t  destination_value = 0x0;
+
+    switch (func3) {
+        case 0x0:
+            destination_value = (int32_t)mem.read_byte(register_file.get(rs1)+imm);
+            break;
+        case 0x1:
+            destination_value = (int32_t)mem.read_half_word(register_file.get(rs1)+imm);
+            break;
+        case 0x2:
+            destination_value = (int32_t)mem.read_word(register_file.get(rs1)+imm);
+            break;
+        case 0x4:
+            destination_value = (int32_t)((uint32_t)mem.read_byte(register_file.get(rs1)+imm));
+            break;
+        case 0x5:
+            destination_value = (int32_t)((uint32_t)mem.read_half_word(register_file.get(rs1)+imm));
+            break;
+        default:
+            break;
+    }
+    register_file.set(get_rd(instruction),destination_value);
+}
+
+void disassembler::execute_ecall(uint32_t instruction) {
+    int32_t a7 = register_file.get(17);
+    switch (a7) {
+        case 0:
+            std::cout<<register_file.get(10)<<"\n";
+            break;
+        case 4:
+            print_string(register_file.get(10));
+            break;
+        case 10:
+            exit(0);
+        default:
+            std::cout<<"4";
+            break;
+    }
+    
+}
+
+void disassembler::print_string(int32_t address) {
+    while(mem.read_byte(address)!=0x0){
+        std::cout<<mem.read_byte(address++);
+    }
+}
+
+void disassembler::print_instruction(uint32_t instruction) {
+
+}
+
+
 
 
