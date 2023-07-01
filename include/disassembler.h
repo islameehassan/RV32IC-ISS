@@ -20,6 +20,7 @@ class disassembler {
     RegisterFile register_file;
 
     int32_t PC;
+    string instruction_name;
 
     bool is_cur_inst_compressed;
 
