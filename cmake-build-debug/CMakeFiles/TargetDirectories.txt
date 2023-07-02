@@ -1,3 +1,0 @@
-C:/RV32IC-ISS/cmake-build-debug/CMakeFiles/RV32IC_ISS.dir
-C:/RV32IC-ISS/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/RV32IC-ISS/cmake-build-debug/CMakeFiles/rebuild_cache.dir
