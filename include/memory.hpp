@@ -43,7 +43,11 @@ public:
     int store_word (int location,uint32_t word);
 
     // load .text section into memory where it should have all instructions
-    int load_text_section(std::string machine_code_fname);
+    void load_text_section(const std::string& machine_code_fname);
+
+    // load .data section into memory
+    void load_data_section(const std::string& machine_code_fname);
+
 };
 
 #endif //RV32IC_ISS_MEMORY_H

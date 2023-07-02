@@ -21,6 +21,8 @@ class disassembler {
 
     int32_t PC;
 
+    string instruction_name;
+
     bool is_cur_inst_compressed;
 
     uint32_t decode_compressed_instruction(uint16_t cinstruction);
@@ -43,13 +45,12 @@ class disassembler {
     void execute_stype(uint32_t instruction);
     void execute_btype(uint32_t instruction);
     void execute_jtype(uint32_t instruction);
-    void execute_ecall(uint32_t instruction);
+    void execute_ecall();
     void execute_utype_lui (uint32_t instruction);
     void execute_utype_aui (uint32_t instruction);
     void execute_itype_arit(uint32_t instruction);
     void execute_itype_load(uint32_t instruction);
     void execute_itype_jalr(uint32_t instruction);
-    void print_instruction (uint32_t instruction);
 
 public:
     //

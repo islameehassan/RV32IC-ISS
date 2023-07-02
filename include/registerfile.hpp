@@ -1,4 +1,7 @@
-#include <stdint.h>
+#ifndef RV32IC_ISS_REGISTERFILE_H
+#define RV32IC_ISS_REGISTERFILE_H
+
+#include <cstdint>
 #include <iostream>
 
 using std::string;
@@ -17,17 +20,20 @@ static const string regnames[] = {
 class RegisterFile{
     // Register File
     int32_t regfile[32];
+    const int& firstElement = regfile[0];
 
 public:
     // initializes x0 with 0, and the rest with 0x1 (dummy value)
     RegisterFile();
 
     // set register "r" with value "value"
-    int set(int r, int32_t value);
+    int set(uint32_t r, int32_t value);
 
     // get the value stored in register "r"
-    int32_t get(int r);
+    int32_t get(uint32_t r);
 
     // get the mnemonic name for register "r"
-    string getMnemonic(int r);
+    string getMnemonic(uint32_t r);
 };
+
+#endif //RV32IC_ISS_REGISTERFILE_H

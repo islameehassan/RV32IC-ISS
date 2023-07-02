@@ -1,6 +1,9 @@
 /*
 * Handles write and read to the simulated memory
 * Data Storage : Little endian
+* 64Kbytes for text section
+* 16Kbytes for data section
+* Any changes in memory sizes requires changing all memory functions
 */
 
 #include "memory.hpp"
@@ -103,11 +106,11 @@ int Memory::store_word(int location, uint32_t word) {
     return 0;
 }
 
-int Memory::load_text_section(std::string machine_code_fname) {
+void Memory::load_text_section(const std::string& machine_code_fname) {
 
     std::ifstream inFile;
 
-    inFile.open("C:\\RV32IC-ISS\\t0.bin", std::ios::in | std::ios::binary | std::ios::ate);
+    inFile.open("C:\\RV32IC-ISS\\t2.bin", std::ios::in | std::ios::binary | std::ios::ate);
 
     if(inFile.is_open())
     {
@@ -125,7 +128,28 @@ int Memory::load_text_section(std::string machine_code_fname) {
             ::printf("Cannot access input file\n");
             exit(0);
         }
-    return 0;
+}
+
+void Memory::load_data_section(const std::string& machine_code_fname) {
+
+    std::ifstream inFile;
+
+    inFile.open("C:\\RV32IC-ISS\\t1-d.bin", std::ios::in | std::ios::binary | std::ios::ate);
+
+    if(inFile.is_open())
+    {
+        std::streamsize fsize = inFile.tellg();
+
+        inFile.seekg (0, std::ifstream::beg);
+        // 00010111000000010000000100000000
+        if(!inFile.read((char *)(memory_array+70000),fsize)) {
+            ::printf("Cannot read from input file\n");
+            exit(0);
+        }
+    }else{
+        ::printf("Cannot access input file\n");
+        exit(0);
+    }
 }
 
 uint32_t Memory::get_eot() const {

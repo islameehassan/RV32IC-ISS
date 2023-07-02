@@ -28,17 +28,17 @@ void disassembler::run() {
     for(PC = 0x00000000 ; PC <= mem.get_eot() ; ){
         uint16_t  half_word = mem.read_half_word(PC);
         if((half_word & 0x03) != 0x03){
-                is_cur_inst_compressed = true ;
-                // it is a compressed instruction
-                std::cout<<"ERROR"<<PC<<"\n";
-                PC+=2;
+            is_cur_inst_compressed = true ;
+            // it is a compressed instruction
+            std::cout<<"ERROR"<<PC<<"\n";
+            PC+=2;
         }else if((half_word & 0x03) == 0x03 && (half_word & 0x1C) != 0x1C) {
-                is_cur_inst_compressed = false ;
-                uint32_t word = mem.read_word(PC);
-                decode_instruction(word);
-                PC+=4;
+            is_cur_inst_compressed = false ;
+            uint32_t word = mem.read_word(PC);
+            decode_instruction(word);
+            PC+=4;
         }else
-                continue;
+            continue;
     }
 }
 
@@ -136,7 +136,7 @@ uint32_t disassembler::decode_instruction(uint32_t instruction) {
             execute_itype_jalr(instruction);
             break;
         case I_syscall_opcode:
-            execute_ecall(instruction);
+            execute_ecall();
             break;
         case U_auipc_opcode:
             execute_utype_aui(instruction);
@@ -160,58 +160,75 @@ void disassembler::execute_rtype(uint32_t instruction) {
 
     switch (func3) {
         case 0x0:
-            if(get_func7(instruction))
+            if (get_func7(instruction)) {
                 destination_value = register_file.get(rs1) - register_file.get(rs2);
-            else
+                instruction_name = "SUB";
+            } else {
                 destination_value = register_file.get(rs1) + register_file.get(rs2);
+                instruction_name = "ADD";
+            }
             break;
         case 0x1:
             destination_value = register_file.get(rs1) << register_file.get(rs2);
-            if(register_file.get(rs2)<0)
-                destination_value = 0 ;
+            if (register_file.get(rs2) < 0)
+                destination_value = 0;
+            instruction_name = "SLL";
             break;
         case 0x2:
-            if(register_file.get(rs1)<register_file.get(rs2))
+            if (register_file.get(rs1) < register_file.get(rs2))
                 destination_value = 0x1;
             else
                 destination_value = 0x0;
+            instruction_name = "SLT";
             break;
         case 0x3:
-            if((uint32_t)register_file.get(rs1)<(uint32_t)register_file.get(rs2))
+            if ((uint32_t) register_file.get(rs1) < (uint32_t) register_file.get(rs2))
                 destination_value = 0x1;
             else
                 destination_value = 0x0;
+            instruction_name = "SLTU";
             break;
         case 0x4:
-                destination_value = register_file.get(rs1) ^ register_file.get(rs2);
+            destination_value = register_file.get(rs1) ^ register_file.get(rs2);
+            instruction_name = "XOR";
             break;
         case 0x5:
-            if(get_func7(instruction))
+            if (get_func7(instruction)) {
                 destination_value = register_file.get(rs1) >> register_file.get(rs2);
-            else
-                destination_value = (int32_t)((uint32_t)register_file.get(rs1) >> register_file.get(rs2));
+                instruction_name = "SRA";
+            } else {
+                destination_value = (int32_t) ((uint32_t) register_file.get(rs1) >> register_file.get(rs2));
+                instruction_name = "SRL";
+            }
             if(register_file.get(rs2)<0)
                 destination_value = 0 ;
             break;
         case 0x6:
             destination_value = register_file.get(rs1) | register_file.get(rs2);
+            instruction_name = "OR";
             break;
         case 0x7:
             destination_value = register_file.get(rs1) & register_file.get(rs2);
+            instruction_name = "AND";
             break;
         default:
             break;
     }
-    std::cout<<register_file.getMnemonic(rs1)<<std::setw(8)<<register_file.getMnemonic(rs2)
-    <<std::setw(8)<<register_file.getMnemonic(get_rd(instruction))<<"\n";
-    register_file.set(get_rd(instruction),destination_value);
+    register_file.set(get_rd(instruction), destination_value);
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(get_rd(instruction)) << std::setw(8)
+              << register_file.getMnemonic(rs1) << std::setw(8) << register_file.getMnemonic(rs2) << "\n";
+
 }
 
 void disassembler::execute_itype_jalr(uint32_t instruction) {
-
     int32_t destination = get_imm_itype(instruction)+register_file.get(get_rs1(instruction));
+    int32_t imm = get_imm_itype(instruction);
+    uint32_t rs1 = get_rs1(instruction);
+    int32_t tmp = register_file.get(rs1);
     register_file.set(get_rd(instruction),is_cur_inst_compressed ? PC+2 : PC+4);  // MIGHT BE WRONG
-    PC = (is_cur_inst_compressed ? destination - 2 : destination - 4) ;
+    PC = (is_cur_inst_compressed ? destination - 2 : destination - 4);
+    instruction_name = "JALR";
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(get_rd(instruction)) << "\n";
 }
 
 
@@ -224,45 +241,58 @@ void disassembler::execute_itype_arit(uint32_t instruction) {
     switch (func3) {
         case 0x0:
             destination_value = register_file.get(rs1) + imm;
+            instruction_name = "ADDI";
             break;
         case 0x1:
             imm = imm & 0x1F;
             destination_value = register_file.get(rs1) << imm ;
+            instruction_name = "SLLI";
             break;
         case 0x2:
             if(register_file.get(rs1)<imm)
                 destination_value = 0x1;
             else
                 destination_value = 0x0;
+            instruction_name = "SLTI";
             break;
         case 0x3:
             if((uint32_t)register_file.get(rs1)<(uint32_t)imm)
                 destination_value = 0x1;
             else
                 destination_value = 0x0;
+            instruction_name = "SLTIU";
             break;
         case 0x4:
             destination_value = register_file.get(rs1) ^ imm;
+            instruction_name = "XORI";
             break;
         case 0x5:
             if(!(imm & 0xF00)) {
                 imm = imm & 0x1F;
                 destination_value = (int32_t)((uint32_t)register_file.get(rs1) >> imm);
+                instruction_name = "SRLI";
             }else{
                 imm = imm & 0x1F;
                 destination_value = register_file.get(rs1) >> imm;
+                instruction_name = "SRAI";
             }
             break;
         case 0x6:
             destination_value = register_file.get(rs1) | imm;
+            instruction_name = "ORI";
             break;
         case 0x7:
             destination_value = register_file.get(rs1) & imm;
+            instruction_name = "ANDI";
             break;
         default:
             break;
     }
-    register_file.set(get_rd(instruction),destination_value);
+    register_file.set(get_rd(instruction), destination_value);
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(get_rd(instruction)) << std::setw(8)
+              << register_file.getMnemonic(rs1) << std::setw(8) << std::hex << imm << "\n";
+
+
 }
 
 void disassembler::execute_stype(uint32_t instruction) {
@@ -273,16 +303,23 @@ void disassembler::execute_stype(uint32_t instruction) {
     switch (func3) {
         case 0x0:
             mem.store_byte(destination_value,register_file.get(rs2));
+            instruction_name = "SB";
             break;
         case 0x1:
             mem.store_half_word(destination_value,register_file.get(rs2));
+            instruction_name = "SH";
             break;
         case 0x2:
             mem.store_word(destination_value,register_file.get(rs2));
+            instruction_name = "SW";
             break;
         default:
             break;
     }
+    std::cout << instruction_name << std::setw(8)
+              << register_file.getMnemonic(rs2) << std::setw(8) << std::hex << get_imm_stype(instruction)
+              << "(" << register_file.getMnemonic(get_rd(instruction)) << ")" << "\n";
+
 }
 
 void disassembler::execute_btype(uint32_t instruction) {
@@ -294,43 +331,66 @@ void disassembler::execute_btype(uint32_t instruction) {
         case 0x0:
             if(register_file.get(rs1)==register_file.get(rs2))
                 PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            instruction_name = "BEQ";
             break;
         case 0x1:
             if(register_file.get(rs1)!=register_file.get(rs2))
                 PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            instruction_name = "BNE";
             break;
         case 0x4:
             if(register_file.get(rs1)<register_file.get(rs2))
                 PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            instruction_name = "BLT";
             break;
         case 0x5:
             if(register_file.get(rs1)>=register_file.get(rs2))
                 PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            instruction_name = "BGE";
             break;
         case 0x6:
             if((uint32_t)register_file.get(rs1)<(uint32_t)register_file.get(rs2))
                 PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            instruction_name = "BLTU";
             break;
         case 0x7:
             if((uint32_t)register_file.get(rs1)>=(uint32_t)register_file.get(rs2))
                 PC = (is_cur_inst_compressed ? (PC+get_imm_btype(instruction)-2):(PC+get_imm_btype(instruction)-4)); // MIGHT BE WRONG CHECK LATER
+            instruction_name = "BGEU";
             break;
         default:
             break;
     }
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(rs1) << std::setw(8)
+              << register_file.getMnemonic(rs2) << std::setw(8) << std::hex << get_imm_btype(instruction) << "\n";     //need checking <<<<<<<<<<<<<<<<<<
+
 }
 
 void disassembler::execute_jtype(uint32_t instruction) {
     register_file.set(get_rd(instruction),is_cur_inst_compressed ? PC+2 : PC+4);
     PC = (is_cur_inst_compressed ? (PC+get_imm_jtype(instruction)-2):(PC+get_imm_jtype(instruction)-4)); // MIGHT BE WRONG
+
+    instruction_name = "JAL";
+
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(get_rd(instruction)) << std::setw(8)
+              << std::hex << get_imm_jtype(instruction) <<"\n";
+
 }
 
 void disassembler::execute_utype_lui(uint32_t instruction) {
     register_file.set(get_rd(instruction), get_imm_utype(instruction));
+
+    instruction_name = "LUI";
+
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(get_rd(instruction)) << std::setw(8)
+              << std::hex << get_imm_utype(instruction) << "\n";
 }
 
 void disassembler::execute_utype_aui(uint32_t instruction) {
     register_file.set(get_rd(instruction),PC + get_imm_jtype(instruction));
+    instruction_name = "AUIPC";
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(get_rd(instruction)) << std::setw(8)
+              << std::hex << get_imm_jtype(instruction) << "\n";
 }
 
 void disassembler::execute_itype_load(uint32_t instruction) {
@@ -342,41 +402,55 @@ void disassembler::execute_itype_load(uint32_t instruction) {
     switch (func3) {
         case 0x0:
             destination_value = (int32_t)mem.read_byte(register_file.get(rs1)+imm);
+            instruction_name = "LB";
             break;
         case 0x1:
             destination_value = (int32_t)mem.read_half_word(register_file.get(rs1)+imm);
+            instruction_name = "LH";
             break;
         case 0x2:
             destination_value = (int32_t)mem.read_word(register_file.get(rs1)+imm);
+            instruction_name = "LW";
             break;
         case 0x4:
             destination_value = (int32_t)((uint32_t)mem.read_byte(register_file.get(rs1)+imm));
+            instruction_name = "LBU";
             break;
         case 0x5:
             destination_value = (int32_t)((uint32_t)mem.read_half_word(register_file.get(rs1)+imm));
+            instruction_name = "LHU";
             break;
         default:
             break;
     }
     register_file.set(get_rd(instruction),destination_value);
+
+    std::cout << instruction_name << std::setw(8) << register_file.getMnemonic(rs1)
+    << std::setw(8) << std::hex << imm <<std::setw(8)
+    << "(" << register_file.getMnemonic(get_rd(instruction)) << ")" << std::setw(8) << "\n";
 }
 
-void disassembler::execute_ecall(uint32_t instruction) {
+void disassembler::execute_ecall() {
     int32_t a7 = register_file.get(17);
     switch (a7) {
-        case 0:
-            std::cout<<register_file.get(10)<<"\n";
+        case 1:
+            std::cout<<register_file.get(10)<<"---\n";
             break;
         case 4:
             print_string(register_file.get(10));
             break;
+        case 5:
+            int32_t x;
+            std::cin >> x;
+            register_file.set(10,x);
+            break;
         case 10:
             exit(0);
         default:
-            std::cout<<"4";
-            break;
+            printf("Error in machine code ecall");
+            exit(0);
     }
-    
+
 }
 
 void disassembler::print_string(int32_t address) {
@@ -384,11 +458,6 @@ void disassembler::print_string(int32_t address) {
         std::cout<<mem.read_byte(address++);
     }
 }
-
-void disassembler::print_instruction(uint32_t instruction) {
-
-}
-
 
 
 
