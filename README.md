@@ -7,6 +7,13 @@
 Welcome to the RV32IC-ISS GitHub repository! This project aims to provide a powerful and efficient solution for converting machine code into RISC-V assembly instructions. The disassembler takes raw machine code as input and produces the corresponding assembly instructions, allowing developers to analyze and understand low-level code.
 
 ## How to build the project?
+```
+mkdir build
+cd build
+cmake ..
+make
+rvsim <machine_code_file> [<data_section_file>]
+```
 ## Project Features
 <font size = "12">
 The Disassembler project provides the following key features:
