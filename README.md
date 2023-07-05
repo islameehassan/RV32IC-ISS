@@ -5,7 +5,8 @@
 ## Introduction
 <font size = "12">
 Welcome to the RV32IC-ISS GitHub repository! This project aims to provide a powerful and efficient solution for converting machine code into RISC-V assembly instructions. The disassembler takes raw machine code as input and produces the corresponding assembly instructions, allowing developers to analyze and understand low-level code.
-  
+
+## How to build the project?
 ## Project Features
 <font size = "12">
 The Disassembler project provides the following key features:
@@ -31,3 +32,26 @@ The following is a list of instruction formats:
 ![Screenshot 2023-07-06 011159](https://github.com/islameehassan/RV32IC-ISS/assets/96207250/734865a7-dfdd-46ed-a550-730c9d9c5a40)
 ![image](https://github.com/islameehassan/RV32IC-ISS/assets/96207250/689b1279-8e1d-468e-a666-5d51c6481c89)
 
+# disassembler Class
+
+The __'disassembler'__ class encapsulates the core functionality of the disassembler. It contains methods for decoding machine code instructions, executing instructions, and printing the corresponding assembly instructions. Some key methods of this class include:
+
+__'execute_rtype'__: Executes R-type instructions (e.g., add, sub, and, or, etc.).<br />
+__'execute_stype'__: Executes S-type instructions (e.g., store).<br />
+__'execute_btype'__: Executes B-type instructions (e.g., branch).<br />
+__'execute_jtype'__: Executes J-type instructions (e.g., jump).<br />
+__'execute_ecall'__: Executes ecall and ebreak instructions.<br />
+__'execute_utype_lui'__: Executes LUI instructions.<br />
+__'execute_utype_aui'__: Executes AUIPC instructions.<br />
+__'execute_itype_arit'__: Executes I-type arithmetic instructions (e.g., addi, xori, etc.).<br />
+__'execute_itype_load'__: Executes I-type load instructions (e.g., lw, lb, etc.).<br />
+__'execute_itype_jalr'__: Executes I-type jalr instruction.<br />
+The __'disassembler'__ class also includes various methods for decoding compressed instructions and extracting immediate values from instructions.<br />
+
+# memory Class
+
+The memory class represents the simulated memory of the CPU. It handles read and write operations to the memory, as well as loading the machine code sections. The memory is byte-addressable, and it provides methods such as __'read_byte', 'read_half_word', 'read_word', 'store_byte', 'store_half_word', and 'store_word'__ for accessing and modifying memory contents.
+
+# register file Class
+
+The __'register file'__ class handles read and write operations to the CPU's register file. It provides methods for setting the value of a register, getting the value stored in a register, and retrieving the mnemonic name of a register.
