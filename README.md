@@ -32,7 +32,7 @@ The following is a list of instruction formats:
 ![Screenshot 2023-07-06 011159](https://github.com/islameehassan/RV32IC-ISS/assets/96207250/734865a7-dfdd-46ed-a550-730c9d9c5a40)
 ![image](https://github.com/islameehassan/RV32IC-ISS/assets/96207250/689b1279-8e1d-468e-a666-5d51c6481c89)
 
-# disassembler Class
+# Disassembler Class
 
 The __'disassembler'__ class encapsulates the core functionality of the disassembler. It contains methods for decoding machine code instructions, executing instructions, and printing the corresponding assembly instructions. Some key methods of this class include:
 
@@ -48,11 +48,11 @@ __'execute_itype_load'__: Executes I-type load instructions (e.g., lw, lb, etc.)
 __'execute_itype_jalr'__: Executes I-type jalr instruction.<br />
 The __'disassembler'__ class also includes various methods for decoding compressed instructions and extracting immediate values from instructions.<br />
 
-# memory Class
+# Memory Class
 
 The memory class represents the simulated memory of the CPU. It handles read and write operations to the memory, as well as loading the machine code sections. The memory is byte-addressable, and it provides methods such as __'read_byte', 'read_half_word', 'read_word', 'store_byte', 'store_half_word', and 'store_word'__ for accessing and modifying memory contents.
 
-# register file Class
+# Register File Class
 
 The __'register file'__ class handles read and write operations to the CPU's register file. It provides methods for setting the value of a register, getting the value stored in a register, and retrieving the mnemonic name of a register.
 
