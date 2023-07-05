@@ -1,13 +1,8 @@
-#include "registerfile.hpp"
+#include "../include/registerfile.hpp"
+#include <cstring>
 
 RegisterFile::RegisterFile(){
-    // set x0 to zero
-    regfile[0] = 0x0;
-
-    // set the rest to 1
-    for (int i = 1; i < 32; i++){
-        regfile[i] = 0x1;
-    }
+    memset(regfile, 0, sizeof(regfile));
 }
 
 int RegisterFile::set(uint32_t r, int32_t value){

@@ -1,0 +1,3 @@
+/home/islam/AUC/junior/Assembly/Project/RV32IC/build/CMakeFiles/RV32IC_ISS.dir
+/home/islam/AUC/junior/Assembly/Project/RV32IC/build/CMakeFiles/edit_cache.dir
+/home/islam/AUC/junior/Assembly/Project/RV32IC/build/CMakeFiles/rebuild_cache.dir

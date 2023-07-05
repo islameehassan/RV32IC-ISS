@@ -110,7 +110,11 @@ void Memory::load_text_section(const std::string& machine_code_fname) {
 
     std::ifstream inFile;
 
+<<<<<<< HEAD
     inFile.open("C:\\RV32IC-ISS\\t2.bin", std::ios::in | std::ios::binary | std::ios::ate);
+=======
+    inFile.open(machine_code_fname, std::ios::in | std::ios::binary | std::ios::ate);
+>>>>>>> 6716792 (finalized compressed extension)
 
     if(inFile.is_open())
     {
@@ -130,11 +134,19 @@ void Memory::load_text_section(const std::string& machine_code_fname) {
         }
 }
 
+<<<<<<< HEAD
 void Memory::load_data_section(const std::string& machine_code_fname) {
 
     std::ifstream inFile;
 
     inFile.open("C:\\RV32IC-ISS\\t1-d.bin", std::ios::in | std::ios::binary | std::ios::ate);
+=======
+void Memory::load_data_section(const std::string& data_section_fname) {
+
+    std::ifstream inFile;
+
+    inFile.open(data_section_fname, std::ios::in | std::ios::binary | std::ios::ate);
+>>>>>>> 6716792 (finalized compressed extension)
 
     if(inFile.is_open())
     {
@@ -142,7 +154,11 @@ void Memory::load_data_section(const std::string& machine_code_fname) {
 
         inFile.seekg (0, std::ifstream::beg);
         // 00010111000000010000000100000000
+<<<<<<< HEAD
         if(!inFile.read((char *)(memory_array+70000),fsize)) {
+=======
+        if(!inFile.read((char *)(memory_array+65536),fsize)) {
+>>>>>>> 6716792 (finalized compressed extension)
             ::printf("Cannot read from input file\n");
             exit(0);
         }
@@ -155,6 +171,5 @@ void Memory::load_data_section(const std::string& machine_code_fname) {
 uint32_t Memory::get_eot() const {
     return eof_text_section;
 }
-
 
 
