@@ -59,7 +59,7 @@ The memory class represents the simulated memory of the CPU. It handles read and
 The __'register file'__ class handles read and write operations to the CPU's register file. It provides methods for setting the value of a register, getting the value stored in a register, and retrieving the mnemonic name of a register.
 
 # Test Cases
-The simulator was tested using twelve different test cases: 6 of them are compiled for rv32i and the other 6 are compiled for rv32ic. 
+The simulator was tested using twelve different test cases: six of them were compiled for rv32i, and the other six were compiled for rv32ic. 
 
 
 # Data Storage and Representation
