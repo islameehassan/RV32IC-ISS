@@ -32,6 +32,9 @@ The following is a list of instruction formats:
 ![Screenshot 2023-07-06 011159](https://github.com/islameehassan/RV32IC-ISS/assets/96207250/734865a7-dfdd-46ed-a550-730c9d9c5a40)
 ![image](https://github.com/islameehassan/RV32IC-ISS/assets/96207250/689b1279-8e1d-468e-a666-5d51c6481c89)
 
+# Data Storage and Representation
+Arrays serve as the main data structure for representing both the memory and the register file in the  RISC-V processor simulation. The code also includes standard C++ data structures nt, uint32_t, and std::string. These are essential for representing integers, register numbers and strings.
+
 # Disassembler Class
 
 The __'disassembler'__ class encapsulates the core functionality of the disassembler. It contains methods for decoding machine code instructions, executing instructions, and printing the corresponding assembly instructions. Some key methods of this class include:
