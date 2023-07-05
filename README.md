@@ -55,3 +55,13 @@ The memory class represents the simulated memory of the CPU. It handles read and
 # register file Class
 
 The __'register file'__ class handles read and write operations to the CPU's register file. It provides methods for setting the value of a register, getting the value stored in a register, and retrieving the mnemonic name of a register.
+
+# Conclusion
+
+The Disassembler project offers a powerful solution for converting machine code into readable RISC-V assembly instructions. With its efficient decoding and analysis capabilities, developers can gain insights into program behavior, debug code, and optimize execution.
+
+The project consists of three main classes: disassembler, memory, and register file. The disassembler class handles instruction decoding, execution, and printing of assembly instructions. The memory class manages memory operations, while the register file class handles register read and write operations.
+
+Supporting various input formats, the disassembler integrates smoothly into different workflows, accommodating different machine code sources.
+
+The project's documentation provides clear instructions and examples for easy implementation. Contributions from the developer community are encouraged to enhance the disassembler's functionality.
