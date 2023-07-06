@@ -8,13 +8,14 @@
 #include <iomanip>
 #include "cstring"
 #include <stdexcept>
+#include <iomanip>
 
 // Memory is byte addressable
 class Memory{
 
     // text section array assumed to start at 0x00000000 and has size = 64Kbytes
     // data section array assumed to start at 0x00010000 and has size = 16Kbytes
-    uint8_t memory_array [81920];
+    uint8_t memory_array [81920]{};
     uint32_t eof_text_section;
 
 

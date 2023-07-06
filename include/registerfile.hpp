@@ -1,6 +1,6 @@
 #ifndef RV32IC_ISS_REGISTERFILE_H
 #define RV32IC_ISS_REGISTERFILE_H
-
+#include <cstring>
 #include <cstdint>
 #include <iostream>
 
@@ -19,7 +19,7 @@ static const string regnames[] = {
 
 class RegisterFile{
     // Register File
-    int32_t regfile[32];
+    int32_t regfile[32]{};
     const int& firstElement = regfile[0];
 
 public:
@@ -33,7 +33,7 @@ public:
     int32_t get(uint32_t r);
 
     // get the mnemonic name for register "r"
-    string getMnemonic(uint32_t r);
+    static string getMnemonic(uint32_t r);
 };
 
 #endif //RV32IC_ISS_REGISTERFILE_H

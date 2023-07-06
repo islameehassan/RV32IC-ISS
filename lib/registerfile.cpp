@@ -1,5 +1,4 @@
-#include "../include/registerfile.hpp"
-#include <cstring>
+#include "registerfile.hpp"
 
 RegisterFile::RegisterFile(){
     memset(regfile, 0, sizeof(regfile));
