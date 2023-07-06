@@ -72,6 +72,18 @@ The simulator was tested using twelve different test cases: six of them were com
 # Data Storage and Representation
 Arrays serve as the main data structure for representing both the memory and the register file in the RISC-V processor simulation. The code also includes standard C++ data structures int, uint32_t, and std::string. These are essential for representing integers, register numbers, and strings.
 
+# Challenges
+- The logic of shifting and masking is very intuitive to implement; however, doing a wrong masking or shifting, even by one bit offset, is capable of ruining the entire flow of the code, especially if related to jumping instructions.
+- Testing is a bit tedious due to the amount of hardcoded constants involved in shifting and masking, and their non-decimal nature which makes it difficult to make sense of on the fly.
+
+# Limitations
+- Currently, the code does not print the name of the compressed instruction.
+
+# TODO
+- Adding multiple options to the CLI, e.g., -o for printing the original register names not ABI. 
+- Adding F and M extensions 
+- Implementing a GUI on QT.
+
 # Conclusion
 
 The Disassembler project offers a powerful solution for converting machine code into readable RISC-V assembly instructions. With its efficient decoding and analysis capabilities, developers can gain insights into program behavior, debug code, and optimize execution.
