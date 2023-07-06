@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/islam/AUC/junior/Assembly/Project/RV32IC/build",
+  "command": "/usr/bin/g++ -I/home/islam/AUC/junior/Assembly/Project/RV32IC/include -g -std=gnu++14 -o CMakeFiles/RV32IC_ISS.dir/lib/disassembler.cpp.o -c /home/islam/AUC/junior/Assembly/Project/RV32IC/lib/disassembler.cpp",
+  "file": "/home/islam/AUC/junior/Assembly/Project/RV32IC/lib/disassembler.cpp"
+},
+{
+  "directory": "/home/islam/AUC/junior/Assembly/Project/RV32IC/build",
+  "command": "/usr/bin/g++ -I/home/islam/AUC/junior/Assembly/Project/RV32IC/include -g -std=gnu++14 -o CMakeFiles/RV32IC_ISS.dir/lib/memory.cpp.o -c /home/islam/AUC/junior/Assembly/Project/RV32IC/lib/memory.cpp",
+  "file": "/home/islam/AUC/junior/Assembly/Project/RV32IC/lib/memory.cpp"
+},
+{
+  "directory": "/home/islam/AUC/junior/Assembly/Project/RV32IC/build",
+  "command": "/usr/bin/g++ -I/home/islam/AUC/junior/Assembly/Project/RV32IC/include -g -std=gnu++14 -o CMakeFiles/RV32IC_ISS.dir/lib/registerfile.cpp.o -c /home/islam/AUC/junior/Assembly/Project/RV32IC/lib/registerfile.cpp",
+  "file": "/home/islam/AUC/junior/Assembly/Project/RV32IC/lib/registerfile.cpp"
+},
+{
+  "directory": "/home/islam/AUC/junior/Assembly/Project/RV32IC/build",
+  "command": "/usr/bin/g++ -I/home/islam/AUC/junior/Assembly/Project/RV32IC/include -g -std=gnu++14 -o CMakeFiles/RV32IC_ISS.dir/main.cpp.o -c /home/islam/AUC/junior/Assembly/Project/RV32IC/main.cpp",
+  "file": "/home/islam/AUC/junior/Assembly/Project/RV32IC/main.cpp"
+}
+]

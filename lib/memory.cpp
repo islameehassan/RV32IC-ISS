@@ -1,15 +1,17 @@
 /*
 * Handles write and read to the simulated memory
+* Data Storage : Little endian
+* 64Kbytes for text section
+* 16Kbytes for data section
+* Any changes in memory sizes requires changing all memory functions
 */
 
 #include "memory.hpp"
-#include "cstring"
-#include <stdexcept>
-
 
 Memory::Memory() {
-    // Initialize memory with 0x0
+    // Initialize memory with 0x0 and end of text section with 0
     memset(memory_array,0,81920);
+    eof_text_section = 0;
 }
 
 uint8_t Memory::read_byte(int location) {
@@ -39,7 +41,7 @@ uint16_t Memory::read_half_word(int location) {
         std::cout << "Exception caught: " << o.what() << std::endl;
     }
     // return half word starting from location
-    return (256U*memory_array[location])+memory_array[location+1];
+    return (256U* read_byte(location+1))+ read_byte(location);
 }
 
 uint32_t Memory::read_word(int location) {
@@ -57,11 +59,11 @@ uint32_t Memory::read_word(int location) {
         std::cout << "Exception caught: " << o.what() << std::endl;
     }
     // return word starting from location
-    return (16777216U*memory_array[location])+(65536U*memory_array[location+1])
-           +(256U*memory_array[location+2])+memory_array[location+3];
+    return (16777216U* read_byte(location+3)+(65536U*read_byte(location+2))
+           +(256U*read_byte(location+1))+read_byte(location));
 }
 
-int Memory::store_byte(int location, uint8_t byte) {
+int Memory::store_byte(int location, uint32_t word) {
     // undefined access to memory
     try{
         if(location < 0x00000000 || location >= 0x00014000)
@@ -70,11 +72,11 @@ int Memory::store_byte(int location, uint8_t byte) {
         std::cout << "Exception caught: " << e.what() << std::endl;
     }
     // store byte in location
-    memory_array[location] = byte;
+    memory_array[location] = word & 0x000000FF;
     return 0;
 }
 
-int Memory::store_half_word(int location, uint16_t half_word) {
+int Memory::store_half_word(int location, uint32_t word) {
     // undefined access to memory
     try{
         if(location>=0x00013FFF)
@@ -83,8 +85,8 @@ int Memory::store_half_word(int location, uint16_t half_word) {
         std::cout << "Exception caught: " << o.what() << std::endl;
     }
     // store half word starting from location
-    store_byte(location, 0x00FF & half_word);
-    store_byte(location+1, 0xFF00 & half_word);
+    store_byte(location, 0x000000FF & word);
+    store_byte(location+1, (0x0000FF00 & word)>>8);
     return 0;
 }
 
@@ -98,16 +100,76 @@ int Memory::store_word(int location, uint32_t word) {
     }
     // storing word starting from location
     store_byte(location,0x000000FF & word);
-    store_byte(location+1,0x0000FF00 & word);
-    store_byte(location+2,0x00FF0000 & word);
-    store_byte(location+3,0xFF000000 & word);
+    store_byte(location+1,(0x0000FF00 & word)>>8);
+    store_byte(location+2,(0x00FF0000 & word)>>16);
+    store_byte(location+3,(0xFF000000 & word)>>24);
     return 0;
 }
 
-int Memory::load_text_section(std::string) {
-    // read instructions from file and put them into memory text section;
-    return 0;
+void Memory::load_text_section(const std::string& machine_code_fname) {
+
+    std::ifstream inFile;
+
+<<<<<<< HEAD
+    inFile.open("C:\\RV32IC-ISS\\t2.bin", std::ios::in | std::ios::binary | std::ios::ate);
+=======
+    inFile.open(machine_code_fname, std::ios::in | std::ios::binary | std::ios::ate);
+>>>>>>> 6716792 (finalized compressed extension)
+
+    if(inFile.is_open())
+    {
+        std::streamsize fsize = inFile.tellg();
+
+        eof_text_section = (uint32_t)fsize - 1 ;
+
+        inFile.seekg (0, std::ifstream::beg);
+        // 00010111000000010000000100000000
+        if(!inFile.read((char *)memory_array,fsize)) {
+            ::printf("Cannot read from input file\n");
+            exit(0);
+        }
+        }else{
+            ::printf("Cannot access input file\n");
+            exit(0);
+        }
 }
 
+<<<<<<< HEAD
+void Memory::load_data_section(const std::string& machine_code_fname) {
+
+    std::ifstream inFile;
+
+    inFile.open("C:\\RV32IC-ISS\\t1-d.bin", std::ios::in | std::ios::binary | std::ios::ate);
+=======
+void Memory::load_data_section(const std::string& data_section_fname) {
+
+    std::ifstream inFile;
+
+    inFile.open(data_section_fname, std::ios::in | std::ios::binary | std::ios::ate);
+>>>>>>> 6716792 (finalized compressed extension)
+
+    if(inFile.is_open())
+    {
+        std::streamsize fsize = inFile.tellg();
+
+        inFile.seekg (0, std::ifstream::beg);
+        // 00010111000000010000000100000000
+<<<<<<< HEAD
+        if(!inFile.read((char *)(memory_array+70000),fsize)) {
+=======
+        if(!inFile.read((char *)(memory_array+65536),fsize)) {
+>>>>>>> 6716792 (finalized compressed extension)
+            ::printf("Cannot read from input file\n");
+            exit(0);
+        }
+    }else{
+        ::printf("Cannot access input file\n");
+        exit(0);
+    }
+}
+
+uint32_t Memory::get_eot() const {
+    return eof_text_section;
+}
 
 
